@@ -1,0 +1,5 @@
+# obsidian文件忽略
+# obsidian插件文件
+.obsidian/
+# obsidian回收站
+.trash/
