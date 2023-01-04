@@ -1,3 +1,7 @@
+>对C语言知识进行复习，为嵌入式学习做准备。
+>视频教程选用[C语言程序设计_浙江大学_中国大学MOOC(慕课) ](https://www.icourse163.org/course/ZJU-9001)
+
+
 # C语言的发展与版本
 
 - K&R the C （经典C）
@@ -6,5 +10,5 @@
 - C99 （支持任意位置定义变量，支持const等）
 - C11
 
-[C语言程序设计_中国大学MOOC(慕课) (icourse163.org)](https://www.icourse163.org/learn/ZJU-9001?tid=9001#/learn/content?type=detail&id=34018&cid=33020)
+
 
