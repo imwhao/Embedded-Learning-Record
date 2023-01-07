@@ -16,6 +16,9 @@
 | git push                    | 将本地仓库push到远程仓库             |
 | git pull                    | 将远程仓库pull到本地仓库             |
 
+git commit --amend  -m "content"  ->上一次修改有错误或忘记提交部分文件时 使用--amend 覆盖上一次提交记录，避免产生过多无用记录。
+
+
 # git学习资源
 
 [git闯关网站](https://learngitbranching.js.org/?locale=zh_CN&NODEMO=)：使用命令模拟结合动画的方式学习git，使用后发现很适合对git的理念了解但不熟悉命令细节的用户。如果不知道什么是版本控制直接使用该网站可能一头雾水。
