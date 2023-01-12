@@ -169,3 +169,74 @@ ODR寄存器控制输出和BSRR寄存器控制输出的区别：ODR可读可写�
 	2. 设置工作模式`HAL_GPIO_Init()`
 2. 设置输出状态（可选）`HAL_GPIO_WritePin()`、`HAL_GPIO_TogglePin()`
 3. 读取输入状态（可选）`HAL_GPIO_ReadPin()`
+
+## 中断
+中断的作用：
+1. 实时控制：在确定时间内对相应事件作出响应。
+2. 故障处理：检测到故障需要第一时间处理。
+3. 数据传输：不知道数据什么时候来，如串口数据接收。
+高效处理紧急程序，不会一直占用CPU资源。
+
+### NVIC
+Nested vectored interrupt controller，嵌套向量中断控制器，属于内核。
+NVIC支持：256个中断（16内核+240外部），支持256个优先级，允许裁剪。（ST公司裁剪为16个）
+
+stm32中断优先级基本概念：
+1. 抢占优先级（pre）：高抢占优先级可以打断正在执行的低抢占优先级中断。
+2. 响应优先级（sub）：当抢占优先级相同时，响应优先级高的先执行，但是不能互相打断。
+3. 自然优先级：抢占和响应都相同的情况下，自然优先级（中断向量表的优先级）越高的，先执行。
+
+stm32中断优先级分组：通过配置`AIRCR[10:8]`对`IPRx bit[7:4]`的四个位进行抢占优先级数目和响应优先级分配。
+
+STM32 NVIC的使用：
+1. 设置中断分组`AIRCR[10:8], HAL_NVIC_SetPriorityGrouping`
+2. 设置中断优先级`IPRx bit[7:4], HAL_NVIC_SetPriority`
+3. 使能中断`ISERx, HAL_NVIC_EnableIRQ`
+
+### EXTI
+External(Extended) interrupt/event Controller，外部（扩展）中断事件控制器。包含20个产生事件/中断请求的边沿检测器，即总共：20条EXTI线（F1）。
+
+EXTI寄存器：
+1. 中断屏蔽寄存器(EXTI_IMR)
+2. 事件屏蔽寄存器(EXTI_EMR)
+3. 上升沿触发选择寄存器(EXTI_RTSR)
+4. 下降沿触发选择寄存器(EXTI_FTSR)
+5. 软件中断事件寄存器(EXTI_SWIER)
+6. 挂起寄存器(EXTI_PR) 
+
+AFIO：Alternate Function IO，即复用功能IO，主要用于重映射和外部中断映射配置（F1）：
+1. 调试IO配置：AFIO_MAPR[26:24]，配置JTAG/SWD的开关状态
+2. 重映射配置：AFIO_MAPR，部分外设IO重映射配置
+3. 外部中断配置：AFIO_EXTICR1~4，配置EXTI中断线0~15对应到哪个具体IO口。
+特别注意：配置AFIO寄存器之前要使能AFIO时钟，方法如下：`__HAL_RCC_AFIO_CLK_ENABLE();对应RCC_APB2ENR寄存器 位0`
+
+中断的产生：
+1. EXTI中断
+	1. GPIO设置输入模式。
+	2. AFIO（F1）或SYSCFG（其他）设置EXTI和IO映射关系。
+	3. EXTI。
+	4. NVIC：设置中断分组、优先级、使能。
+	5. CPU：按优先级顺序，依次处理中断。
+2. 外设中断
+	1. USART/TIM/SPI...
+	2. NVIC：设置中断分组、优先级、使能。
+	3. CPU：按优先级顺序，依次处理中断。
+
+STM32 EXTI的配置步骤（GPIO外部中断）：
+1. 使能GPIO时钟
+2. 设置GPIO输入模式
+3. 使能AFIO/SYSCFG时钟
+4. 设置EXTI和IO对应关系
+5. 设置EXTI屏蔽，上/下沿
+6. 设置NVIC
+7. 设计中断服务函数
+注：HAL库步骤2~5使用`HAL_GPIO_Init`一步到位。
+
+STM32 EXTI的HAL库配置步骤（GPIO外部中断）：
+1. 使能GPIO时钟`__HAL_RCC_GPIOx_CLK_ENABLE`
+2. GPIO/AFIO(SYSCFG)/EXTI `HAL_GPIO_Init`
+3. 设置中断分组`HAL_NVIC_SetPriorityGrouping`，**此函数只需要设置一次**
+4. 设置中断优先级`HAL_NVIC_SetPriority`
+5. 使能中断`HAL_NVIC_EnableIRQ`
+6. 设计中断服务函数`EXTIx_IRQHandler`，中断服务函数，清中断标志
+   STM32仅有EXTI0~4、EXTI9_5、EXTI15_10，7个外部中断服务函数
