@@ -244,7 +244,7 @@ STM32 EXTI的HAL库配置步骤（GPIO外部中断）：
 HAL库中断回调处理机制介绍：
 1. 中断服务函数
 2. HAL库中断处理公用函数
-3. HAL库数据处理回调函数
+3. HAL库数据处理回调函数（函数名以Callback结尾）
 
 ## 串口通信
 串口：即串行通信接口，指按位发送和接收的接口。如：RS-232/422/485等。
@@ -270,3 +270,13 @@ RS-232电平与CMOS/TTL电平对比：
 ### USART
 Universal synchronous asynchronous receiver transmitter，通用同步异步收发器。
 Universal asynchronous receiver transmitter，通用异步收发器，USART裁剪调同步功能。
+
+F1波特率计算公式：$$baud=\frac{f_{ck}}{16*USARTDIV}$$
+
+USART/UART异步通信配置步骤：
+1. 配置串口工作参数 `HAL_UART_Init()`
+2. 串口底层初始化 `HAL_UART_MspInit()`配置GPIO、NVIC、CLOCK等
+3. 开启串口异步接收中断 `HAL_UART_Receive_IT()`
+4. 设置优先级，使能中断 `HAL_NVIC_SetPriority()`、`HAL_NVIC_EnableIRQ()`
+5. 编写中断服务函数 `USARTx_IRQHandler()`、`UARTx_IRQHandler()`
+6. 串口数据发送 寄存器 `USART_DR` HAL库 `HAL_UART_Transmit()`
