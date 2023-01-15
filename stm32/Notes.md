@@ -280,3 +280,24 @@ USART/UART异步通信配置步骤：
 4. 设置优先级，使能中断 `HAL_NVIC_SetPriority()`、`HAL_NVIC_EnableIRQ()`
 5. 编写中断服务函数 `USARTx_IRQHandler()`、`UARTx_IRQHandler()`
 6. 串口数据发送 寄存器 `USART_DR` HAL库 `HAL_UART_Transmit()`
+
+## IWDG
+IWDG简介：
+- IWDG全称：Independent watchdog，即独立看门狗。
+- IWDG本质：能产生**系统复位信号**的计数器。
+- IWDG特性：独立的计数器，时钟由独立的RC振荡器提供（可在待机和停止模式运行），看门狗被激活后，当递减计数器计数到0x000时产生复位。
+- 喂狗：计数器计到0之前，重装载计数器的值，防止复位。
+
+IWDG作用：
+1. 异常：外界电磁干扰或自身系统（硬件或软件）异常，造成程序跑飞，如：陷入某个不正常的死循环，打断正常的程序运行。
+2. IWDG作用：主要用于检测外界电磁干扰，或硬件异常导致的程序跑飞问题。
+3. 应用：在一些需要高稳定性的产品中，并且对时间精度要求较低的场合。
+**注意：独立看门狗是异常处理的最后手段，不可依赖，应在设计时尽量避免异常。**
+
+IWDG溢出时间计算
+IWDG溢出时间计算公式：$$T_{out}=\frac{psc*rlr}{f_{IWDG}}$$
+其中，$T_{out}$是看门狗溢出时间，$f_{IWDG}$是看门狗的时钟源频率，$psc$是看门狗预分频系数，$rlr$是看门狗重装载值。
+
+IWDG配置步骤：
+1. 取消PR/RLR寄存器写保护，设置IWDG预分频系数和重装载值，启动IWDG `HAL_IWDG_Init()`
+2. 及时喂狗，即写入0xAAAA到IWDG_KR `HAL_IWDG_Refresh()`
