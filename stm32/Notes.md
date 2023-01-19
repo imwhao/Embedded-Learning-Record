@@ -430,6 +430,37 @@ stm32基本、通用、高级定时器功能整体的区别：
 PWM周期/频率的计算方法同定时器溢出时间的计算方法：$$T_{out}=\frac{(ARR+1)*(PSC+1)}{F_t}$$
 其中，$T_{out}$是定时器溢出时间，$F_t$是定时器的时钟源频率，$ARR$是自动重装载寄存器的值，$PSC$是预分频器寄存器的值。（ARR+1是因为当设置ARR为0时也要计一个数）
 
+#### 通用定时器输入捕获实验
+通用定时器输入捕获脉宽测量原理：
+以捕获测量**高电平脉宽**为例，假设计数器为递增技术模式，ARR 为自动重装载寄存器的值，CCRx1 为 t1 时间点 CCRx1 的值，CCRx2 为 t2 时间点 CCRx 的值。捕获上升沿后将 CCRx 清零，上升沿触发改为下降沿触发。高电平期间，计时器计数的个数为：`N*(ARR+1) + CCRx2`
 
+通用定时器输入捕获实验配置步骤：
+1. 配置定时器基础工作参数 `HAL_TIM_IC_Init()`
+2. 定时器输入捕获 MSP 初始化 `HAL_TIM_IC_MspInit()` 配置 NVIC、CLOCK、GPIO 等
+3. 配置输入通道映射、捕获边沿等 `HAL_TIM_IC_ConfigChannel()`
+4. 设置优先级，使能中断 `HAL_NVIC_SetPriority()`、`HAL_NVIC_EnableIRQ()`
+5. 使能定时器更新中断 `__HAL_TIM_ENABLE_IT()`
+6. 使能捕获、捕获中断及计数器 `HAL_TIM_IC_Start_IT()`
+7. 编写中断服务函数 `TIMx_IRQHandler()` 等-> `HAL_TIM_IRQHandler()`
+8. 编写更新中断和捕获回调函数 `HAL_TIM_PeriodElapsedCallback()`、`HAL_TIM_IC_CaptureCallback()`
+
+#### 通用定时器脉冲计数实验
+通用定时器脉冲计数实验配置步骤：
+1. 配置定时器基础工作参数 `HAL_TIM_IC_Init()`
+2. 定时器输入捕获 MSP 初始化 `HAL_TIM_IC_MspInit()` 配置 NVIC、CLOCK、GPIO 等
+3. 配置定时器从模式等 `HAL_TIM_SlaveConfigSynchro()`
+4. 使能输入捕获并启动计数器 `HAL_TIM_IC_Start()`
+5. 获取计数器的值 `__HAL_TIM_GET_COUNTER()`
+6. 设置计数器的值 `__HAL_TIM_SET_COUNTER()`
+
+### 高级定时器
+高级定时器简介：
+1. 高级定时器 TIM1/TIM8
+2. 主要特性：除通用定时器特性外还具有
+	1. 重复计数器
+	2. 死区时间带可编程的互补输出
+	3. 断路输入，用于将定时器的输出信号置于用户可选的安全配置中
+
+#### 高级定时器输出指定个数 PWM 实验
 
 
