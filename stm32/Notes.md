@@ -514,7 +514,42 @@ PWM周期/频率的计算方法同定时器溢出时间的计算方法：$$T_{ou
 5. 使能输出、主输出、计数器 `HAL_TIM_PWM_Start()`
 6. 使能互补输出、主输出、计数器 `HAL_TIMEx_PWMN_Start()`
 
+#### 高级定时器 PWM 输入模式实验
+PWM 输入模式只能用 CH1 或 CH2（CH3、CH4 从模式无法选择复位模式）。
 
+高级定时器 PWM 输入模式实验配置步骤：
+1. 配置定时器基础工作参数 `HAL_TIM_IC_Init()`
+2. 定时器捕获输入 MSP 初始化 `HAL_TIM_IC_MspInit()` 配置 NVIC、CLOCK、GPIO 等
+3. 配置 IC1/2 映射、捕获边沿等 `HAL_TIM_IC_ConfigChannel()`
+4. 配置从模式，触发源等 `HAL_TIM_SlaveConfigSynchro()`
+5. 设置优先级，使能中断 `HAL_NVIC_SetPriority()`、`HAL_NVIC_EnableIRQ()`
+6. 使能捕获、捕获中断及计数器 `HAL_TIM_IC_Start_IT()`、`HAL_TIM_IC_Start()`
+7. 编写中断服务函数 `TIMx_IRQHandler()` 等-> `HAL_TIM_IRQHandler()`
+8. 编写输入捕获回调函数 `HAL_TIM_IC_CaptureCallback()`
+
+## OLED
+### OLED 简介
+常用显示屏：LCD 显示屏，点阵显示屏，OLED（Organic Light-Emitting Diode）显示屏
+
+OLED 简介
+1. 优点：
+	1. 自发光，不需要背光
+	2. 功耗更低，节能
+	3. 对比度高，色彩艳丽
+2. 缺点：
+	1. 烧屏
+	2. 价格昂贵
+	3. 低频频闪
+3. 应用场景：
+	1. OLED 电视
+	2. 手机/平板
+	3. 手表/手环
+
+### OLED 驱动原理
+怎么驱动屏幕？
+1. 选择驱动芯片时序，根据时序实现数据写入/读取。
+2. 初始化序列，由厂家提供，初始化屏幕。
+3. 实现画点函数、读点函数（可选），基于这两个函数可以实现各种绘图功能。
 
 
 
