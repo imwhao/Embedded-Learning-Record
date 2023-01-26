@@ -610,9 +610,27 @@ LCD 驱动的一般过程：
 5. 编写 LCD 初始化函数：编写 `lcd_init` 函数，完成初始化序列配置，点亮背光等
 6. 编写 LCD 画点和读点函数
 
-### FSMC
-#### FSMC 简介
-FSMC，Flexible Static Memory Controller，灵活的静态存储控制器，用于驱动 SRAM，NOR FLASH，NAND FLASH 及 PC 卡类型的存储器。
+### FSMC（F1）
+FSMC，Flexible Static Memory Controller，灵活的静态存储控制器。
+
+作用：用于驱动 SRAM，NOR FLASH，NAND FLASH 及 PC 卡类型的存储器。配置好 FSMC，定义一个指向这些地址的指针，通过对指针操作就可以直接修改存储单元的内容，FSMC 自动完成读写命令和数据访问操作，不需要程序去实现时序。FSMC 外设配置好就可以模拟出时序。可用于驱动 LCD 时实现 8080 通讯接口时序。
+
+FMC（F4/F7/H7） 和 LTDC 精英版 Stm32f103 不具备相应硬件资源。
+
+## USMART
+USMART 是一个串口调试组件，可以直接通过串口调用用户编写的函数，随意修改函数参数，提高代码调试效率。
+
+USMART 主要特点：
+1. 可以调用绝大部分用户直接编写的函数
+2. 占用资源少（最小：4KB FLASH，72B SRAM）
+3. 支持参数类型多（整数（10/16）、字符串、函数指针等）
+	1. 注：**不支持**浮点数参数
+4. 支持函数返回值显示且可对格式进行设置
+5. 支持函数执行时间计算
+
+修改 `usmart_port.c/.h` 即可完成移植，修改 `usmart_config.c` 即可添加自己想要调用的函数。
+
+
 
 
 
