@@ -685,3 +685,75 @@ USMART 移植步骤：
 4. 设置 RTC 的日期和时间：操作寄存器方式实现 `rtc_set_time()`
 5. 获取 RTC 当前日期和时间：定义 `rtc_get_time()` 
 
+## RNG
+随机数发生器（ Random Number Generators，RNG ），用于生成随机数的程序或硬件。
+
+F1 系列只能生成伪随机数。F1 系列不具备随机数发生器 RNG。
+
+RNG 基本驱动步骤（H7）：
+1. 使能 RNG 时钟：`__HAL_RCC_RNG_CLK_ENABLE`
+2. 初始化随机数发生器：
+	1. `HAL_RNG_Init`
+	2. `HAL_RNG_MspInit`
+	3. `HAL_RCCEx_PeriphCLKConfig`
+3. 判断 DRDY 位，读取随机数值 `HAL_RNG_GenerateRandomNumber`
+
+## LOW POWER
+低功耗，即降低集成电路的能量消耗。
+
+低功耗特性（对用电池供电的产品）：
+1. 更小的电池体积（大小和成本↓）
+2. 延长电池寿命
+3. 电磁干扰更小，提高无线通信质量
+4. 电源设计更简单，无需过多考虑散热问题
+
+### 低功耗模式
+STM32 具有运行、睡眠、停止和待机四种工作模式。上电后默认是在运行模式，当内核不需要继续运行时，可以选择后面三种低功耗模式。同等条件下（T=25℃，VDD=3.3V，系统时钟 72MHz）
+
+| 模式     | 主要影响                                           | 唤醒时间 | 供应电流（典型值） |
+| -------- | -------------------------------------------------- | -------- | ------------------ |
+| 正常模式 | 所有外设正常工作                                   | 0        | 51mA               |
+| 睡眠模式 | CPU 时钟关闭                                       | 1.8us    | 29.5mA             |
+| 停止模式 |1.8V 时钟区域关闭，电压调节器低功耗 <br> 存储器供电，程序不会复位| 5.4us    | 35uA               |
+|待机模式|1.8V时钟区域关闭，电压调节器关闭 <br>存储器断电，程序复位|50us|3.8uA|
+
+睡眠模式配置步骤：
+1. 初始化 WKUP 为中断触发源：参考外部中断引脚初始化
+2. 外设低功耗处理（可选）：设置 MCU 外围外设进入低功耗
+3. 进入睡眠模式：`HAL_PWR_EnterSLEEPMode`
+4. 等待 WKUP 外部中断唤醒
+
+停止模式配置步骤：
+1. 初始化 WKUP 为中断触发源：参考外部中断引脚初始化
+2. 外设低功耗处理（可选）：设置 MCU 外围外设进入低功耗
+3. 进入睡眠模式：`HAL_PWR_EnterSTOPMode`
+4. 等待 WKUP 外部中断唤醒
+5. 重新设置时钟、重新选择滴答时钟源、失能 systick 中断
+
+待机模式配置步骤：
+1. 初始化 WKUP 为中断触发源（可选）：参考外部中断引脚初始化
+2. 外设低功耗处理（可选）：设置 MCU 外围外设进入低功耗
+3. 使能电源时钟：`__HAL_RCC_PWR_CLK_ENABLE`
+4. 使能 WKUP 的唤醒功能：`HAL_PWR_EnableWakeUpPin`
+5. 清除唤醒标记 WUF：`__HAL_PWR_CLEAR_FLAG`
+6. 进入待机模式：`HAL_PWR_EnterSTANDBYMode`
+
+待机模式下，所有 I/O 引脚处于高阻态，除了复位引脚、被使能的唤醒引脚等->待机模式下不能下载程序。
+
+### STM32 电源监控
+电源监控即对某些电源电压（VDD/VDDA/VBAT）进行监控。最基本的包含：
+- POR/PDR（power on/down reset）：上电/掉电复位
+- PVD（programmable voltage detector）：监控 VDD 电压
+
+PVD 的使用步骤：
+1. 使能电源时钟：`__HAL_RCC_PWR_CLK_ENABLE`
+2. 配置 PVD 检测：通过 `HAL_PWR_ConfigPVD` 配置电压级别、中断线边沿触发
+3. 使能 PVD 检测： `HAL_PWR_EnablePVD`
+4. 设置 PVD 中断优先级
+	1. `HAL_NVIC_SetPriority`
+	2. `HAL_NVIC_EnableIRQ`
+5. 编写中断服务函数
+	1. `PVD_IRQHandler`
+	2. `HAL_PWR_PVD_IRQHandler`
+	3. `HAL_PWR_PVDCallback`
+
