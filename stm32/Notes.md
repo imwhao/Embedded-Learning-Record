@@ -757,3 +757,16 @@ PVD 的使用步骤：
 	2. `HAL_PWR_PVD_IRQHandler`
 	3. `HAL_PWR_PVDCallback`
 
+## DMA
+DMA（Direct Memory Access），即直接存储器访问，DMA 传输将数据从一个地址空间复制到另一个地址空间。
+
+DMA 传输无需 CPU 直接控制传输，也没有中断处理方式那样保留现场和恢复现场过程。通过硬件为 RAM 和 IO 设备开辟一条直接传输数据的通道，使得 CPU 的效率大大提高。
+
+以 DMA 方式传输串口数据配置步骤：
+1. 使能 DMA 时钟：`__HAL_RCC_DMA1_CLK_ENABLE`
+2. 初始化 DMA： `HAL_DMA_Init` 函数初始化 DMA 相关参数，`__HAL_LINKDMA` 函数连接 DMA 和外设
+3. 使能串口的 DMA 发送，启动传输：`HAL_UART_Transmit_DMA`
+4. 查询传输状态
+	1. `__HAL_DMA_GET_FLAG` 查询通道传输状态
+	2. `__HAL_DMA_GET_COUNTER` 获取当前传输剩余数据量
+5. DMA 中断使用：`HAL_NVIC_EnableIRQ`、`HAL_NVIC_SetPriority`，编写中断服务函数 `xxx_IRQHandler`
