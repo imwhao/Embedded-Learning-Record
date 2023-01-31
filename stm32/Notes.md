@@ -831,5 +831,32 @@ DMA 请求（只适用于规则组）：规则组每个通道转换结束后，�
 |连续转换模式（扫描）|ADC_SQRx和ADC_JSQR选中的所有通道都转换一次，并自动进入下一轮转换|
 
 ### 单通道 ADC 采集实验
+单通道 ADC 采集实验配置步骤：
+1. 配置 ADC 工作参数、ADC 校准：`HAL_ADC_Init()`、`HAL_ADCEx_Calibration_Start()`
+2. ADC MSP 初始化：`HAL_ADC_MspInit()` 配置 NVIC、CLOCK、GPIO 等
+3. 配置 ADC 相应通道相关参数：`HAL_ADC_ConfigChannel()`
+4. 启动 A/D 转换：`HAL_ADC_Start()`
+5. 等待规则通道转换完成：`HAL_ADC_PollForConversion()`
+6. 获取规则通道 A/D 转换结果：`HAL_ADC_GetValue()`
+
+### 单通道 ADC 采集（DMA 读取）实验
+单通道 ADC 采集（DMA 读取）实验配置步骤：
+1. 初始化 DMA：`HAL_DMA_Init()`
+2. 将 DMA 和 ADC 句柄联系起来：`__HAL_LINKDMA()`
+3. 配置 ADC 工作参数、ADC 校准：`HAL_ADC_Init()`、`HAL_ADCEx_Calibration_Start()`
+4. ADC MSP 初始化：`HAL_ADC_MspInit()` 配置 NVIC、CLOCK、GPIO 等
+5. 配置 ADC 相应通道相关参数：`HAL_ADC_ConfigChannel()`
+6. 使能 DMA 数据流传输完成中断：`HAL_NVIC_SetPriority()`、`HAL_NVIC_EnableIRQ()`
+7. 编写 DMA 数据流中断服务函数：`DMAx_Channely_IRQHandler()`
+8. 启动 DMA，开启传输完成中断：`HAL_DMA_Start_IT()`
+9. 触发 ADC 转换，DMA 传输数据：`HAL_ADC_Start_DMA()`
+
+### 多通道 ADC 采集（DMA 读取）实验
+在[单通道 ADC 采集（DMA 读取）实验](#单通道%20ADC%20采集（DMA%20读取）实验)基础上修改与循环扫描、引脚设置、通道数相关代码。
+
+### 单通道 ADC 过采样实验
+如何用过采样和求均值的方式提高 ADC 的分辨率？
+1. 根据要增加的分辨率位数计算过采样频率方程：$f_{os}=4^{w}f_{s}$ (其中，$f_{os}$ 是过采样频率，w 是希望增加的分辨率位数，$f_{s}$ 是初始采样频率要求)
+2. 求均值：例如 12 位分辨率的 ADC 提高 4 位分辨率，采样频率就要提高 256 倍，即需要 256 次采集才能得到一次 16 位分辨率的数据，然后将这 256 次采集结果求和，求和的结果再右移 4 位，就得到提高分辨率后的结果。**注意：提高 N 位分辨率，需要右移 N 位**
 
 
