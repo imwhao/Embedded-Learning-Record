@@ -9,52 +9,52 @@
 5. [手把手教你学STM32入门教学视频（老版视频）](https://www.bilibili.com/video/BV1Lx411Z7Qa/) 
 
 开发板使用说明：
-1. 连接外设时可使用资料中`精英板 IO引脚分配表.xlsx`文件查询引脚分配情况。
-2. 例程测试时确保开发板B0，B1都接在GND
+1. 连接外设时可使用资料中 `精英板 IO引脚分配表.xlsx` 文件查询引脚分配情况。
+2. 例程测试时确保开发板 B0，B1 都接在 GND
 
 # 基础篇
 ## 程序下载
 [下载接口](https://www.bilibili.com/video/BV1bv4y1R7dp?t=1425.2&p=4)：
-1. JTAG：占用5个引脚，可以下载、仿真、调试
-2. SWD：占用2个引脚，可以下载、仿真、调试（推荐）
-3. 串口：占用2个引脚，只能下载程序，不能调试
+1. JTAG：占用 5 个引脚，可以下载、仿真、调试
+2. SWD：占用 2 个引脚，可以下载、仿真、调试（推荐）
+3. 串口：占用 2 个引脚，只能下载程序，不能调试
 
 ### 串口下载
 使用工具：FlyMcu
-1. 搜索并选择CH340虚拟串口并设置波特率。
-	1. F4系列波特率最大可以使用76800
-	2. F1系列的波特率最大可以使用460800
-2. 选择hex文件
+1. 搜索并选择 CH340 虚拟串口并设置波特率。
+	1. F4 系列波特率最大可以使用 76800
+	2. F1 系列的波特率最大可以使用 460800
+2. 选择 hex 文件
 3. 勾选『编程前重装文件』
 4. 勾选『校验』和『编程后执行』
-5. **不要**勾选『编程到FLASH时写选项字节』
-6. 选择『DTR的低电平复位，RTS高电平进BootLoader』
+5. **不要**勾选『编程到 FLASH 时写选项字节』
+6. 选择『DTR 的低电平复位，RTS 高电平进 BootLoader』
 
-### JLINK/STLINK下载
+### JLINK/STLINK 下载
 具体配置见[程序下载方法2：JLINK程序下载](https://www.bilibili.com/video/BV1Lx411Z7Qa/?p=9)。
 
 ## 程序调试
-1. JTAG调试需要占用5个引脚。
-2. SWD调试需要占用2个引脚。
+1. JTAG 调试需要占用 5 个引脚。
+2. SWD 调试需要占用 2 个引脚。
 
-JTAG/SWD调试原理：Cortex-M内核含有内核硬件调试模块，该模块可在取指（指令断点）或访问数据（数据断点）时停止。内核停止时，可以查询内核的内部状态和系统的外部状态。完成查询后，可恢复程序运行。
+JTAG/SWD 调试原理：Cortex-M 内核含有内核硬件调试模块，该模块可在取指（指令断点）或访问数据（数据断点）时停止。内核停止时，可以查询内核的内部状态和系统的外部状态。完成查询后，可恢复程序运行。
 
-为了在调试期间可以使用更多GPIOs，通过设置复用重映射和调试I/O配置寄存器(AFIO_MAPR)的SWJ_CFG[2:0]位，可以改变重映像配置。具体配置参考《STM32F10xxx参考手册》 。
+为了在调试期间可以使用更多 GPIOs，通过设置复用重映射和调试 I/O 配置寄存器 (AFIO_MAPR) 的 SWJ_CFG[2:0]位，可以改变重映像配置。具体配置参考《STM32F10xxx 参考手册》 。
 
 ## 存储器映射
 给存储器分配地址的过程叫存储器映射。
 
-STM32将4G(2^32)空间平均分为8个块。
+STM32 将 4G (2^32) 空间平均分为 8 个块。
 
 ## 寄存器映射
 寄存器是单片机内部一种特殊的内存，可以实现对单片机各个功能的控制。给寄存器的地址命名的过程就叫寄存器映射。
 
 ### 地址计算
-寄存器地址计算过程（以GPIOA_ODR寄存器为例）：
+寄存器地址计算过程（以 GPIOA_ODR 寄存器为例）：
 1. 获取外设挂在哪个总线上面？查系统结构图。
-2. 获取总线基地址，APB2总线基地址：0X4001 0000。
-3. 获取外设地址偏移量，GPIOA相对APB2总线偏移量是：0X800。
-4. 获取寄存器地址偏移量，ODR相对GPIOA外设基地址的偏移量是：0X0C。
+2. 获取总线基地址，APB2 总线基地址：0X4001 0000。
+3. 获取外设地址偏移量，GPIOA 相对 APB2 总线偏移量是：0X800。
+4. 获取寄存器地址偏移量，ODR 相对 GPIOA 外设基地址的偏移量是：0X0C。
 5. 寄存器地址=BUS_BASE_ADDR+PERIPH_OFFSET+REG_OFFSET
    GPIOA_ODR = 0X4001 0000+0X800+0X0C=0X4001080C
 
@@ -63,31 +63,31 @@ STM32将4G(2^32)空间平均分为8个块。
 2. 结构体映射，将同一个外设的寄存器作为成员放在一个结构体中，成员数据类型位数与寄存器位数相同，又因为同一个结构体内存连续分配，所以只需要映射外设基地址，外设中的所有寄存器就能完成映射。
 结构体映射例子：`#define GPIOA ((GPIO_TypeDef*)GPIOA_BASE)`
 
-## HAL库工程建立
+## HAL 库工程建立
 裁剪的两种方式：
-1. 在`stm32f1xxx_hal_conf.h`中注释掉对应外设
-2. 不将驱动文件包含到`Drivers/STM32F1xx_HAL_Driver`中。
+1. 在 `stm32f1xxx_hal_conf.h` 中注释掉对应外设
+2. 不将驱动文件包含到 `Drivers/STM32F1xx_HAL_Driver` 中。
 
-HAL库用户配置文件`stm32f1xxx_hal_conf.h`使用：
-1. 裁剪HAL库外设驱动源码（条件编译使对应需要裁剪的驱动源码不编译）
+HAL 库用户配置文件 `stm32f1xxx_hal_conf.h` 使用：
+1. 裁剪 HAL 库外设驱动源码（条件编译使对应需要裁剪的驱动源码不编译）
 2. 设置外部高速晶振频率
 3. 设置外部低速晶振频率
 
-## stm32启动模式
-### STM32启动模式（F1)
-在系统复位后，SYSCLK的第4个上升沿，BOOT引脚的值会被锁存。BOOT0和BOOT1为启动模式选择引脚。不同启动模式（主闪存存储器、系统存储器、内置SRAM）将0x00000000（堆栈指针MSP初始值，即栈顶地址）和0x00000004（程序计数器PC初始值，即复位中断服务函数地址）所映射的地址不同。
+## stm32 启动模式
+### STM32 启动模式（F1)
+在系统复位后，SYSCLK 的第 4 个上升沿，BOOT 引脚的值会被锁存。BOOT0 和 BOOT1 为启动模式选择引脚。不同启动模式（主闪存存储器、系统存储器、内置 SRAM）将 0x00000000（堆栈指针 MSP 初始值，即栈顶地址）和 0x00000004（程序计数器 PC 初始值，即复位中断服务函数地址）所映射的地址不同。
 
 ### STM32CubeMX
-ST开发的一款图形配置工具，可通过配置自动生成初始化代码。
+ST 开发的一款图形配置工具，可通过配置自动生成初始化代码。
 
-## stm32时钟树
+## stm32 时钟树
 ### 系统时钟树配置步骤
-1. 配置HSE_VALUE：告诉HAL库外部晶振频率`stm32xxxx_hal_conf.h`
-2. 调用`SystemInit()`函数（可选）：在启动文件中调用，在`system_stm32xxxx.c`定义
-3. 选择时钟源，配置PLL：通过`HAL_RCC_OscConfig()`函数设置
-4. 选择系统时钟源，配置总线分频器：通过`HAL_RCC_ClockConfig()`函数设置
-5. 配置扩展外设时钟（可选）：通过`HAL_RCCEx_PeriphCLKConfig()`函数设置
-正点原子中调用3+4+5=`sys_stm32_clock_init()`
+1. 配置 HSE_VALUE：告诉 HAL 库外部晶振频率 `stm32xxxx_hal_conf.h`
+2. 调用 `SystemInit()` 函数（可选）：在启动文件中调用，在 `system_stm32xxxx.c` 定义
+3. 选择时钟源，配置 PLL：通过 `HAL_RCC_OscConfig()` 函数设置
+4. 选择系统时钟源，配置总线分频器：通过 `HAL_RCC_ClockConfig()` 函数设置
+5. 配置扩展外设时钟（可选）：通过 `HAL_RCCEx_PeriphCLKConfig()` 函数设置
+正点原子中调用 3+4+5= `sys_stm32_clock_init()`
 
 ### 外设时钟使能和失能
 **我们要使用某个外设，必须先使能该外设时钟！**（为降低功耗，外设时钟默认失能）
@@ -97,76 +97,76 @@ __HAL_RCC_GPIOA_CLK_ENABLE(); /*使能GPIOA时钟*/
 __HAL_RCC_GPIOA_CLK_DISABLE(); /*禁止GPIOA时钟*/ 
 ```
 
-## SYSTEM文件夹介绍
+## SYSTEM 文件夹介绍
 正点原子提供的常用函数。其中子文件夹包括：
 ### sys 
-包括中断类函数、低功耗类函数、设置栈顶指针函数、**系统时钟初始化函数**、Cache配置函数（F7/H7）
+包括中断类函数、低功耗类函数、设置栈顶指针函数、**系统时钟初始化函数**、Cache 配置函数（F7/H7）
 ### delay 
 初始化系统滴答定时器、微妙/毫秒延时函数：
-	1. 初始化滴答定时器时声明了一个全局变量`g_fac_us=sysclk/分频数`，代表1$\mu s$计时器的自减值。（参数`sysclk`单位为MHz）
-由系统滴答计时器实现微秒延时函数。（不超频情况下最大能够实现约1.8s的微妙级延时）
+	1. 初始化滴答定时器时声明了一个全局变量 `g_fac_us=sysclk/分频数`，代表 1 $\mu s$ 计时器的自减值。（参数 `sysclk` 单位为 MHz）
+由系统滴答计时器实现微秒延时函数。（不超频情况下最大能够实现约 1.8s 的微妙级延时）
 用微秒延时函数实现毫秒延时函数。
 ### usart
-printf函数输出流程：
-1. printf()用户调用。
-2. printf函数由编译器提供的stdio.h解析。
-3. fputc()最终实现输出（用户需要根据最终输出的硬件重新定义该函数，此过程称为printf重定向）。
+printf 函数输出流程：
+1. printf () 用户调用。
+2. printf 函数由编译器提供的 stdio. h 解析。
+3. fputc () 最终实现输出（用户需要根据最终输出的硬件重新定义该函数，此过程称为 printf 重定向）。
 
-printf函数支持：
+printf 函数支持：
 1. 避免使用半主机模式（仿真器在电脑上输入输出）。两种方法：
-	1. 微库法：在魔术棒target中勾选Use MicroLIB，实现简单，速度慢，兼容性差。
-	2. 代码法：需要实现一个预处理、两个定义、三个函数，实现复杂，速度快，兼容性好。（`usart.c`文件中实现，直接复制即可）
-2. 实现fputc函数。
+	1. 微库法：在魔术棒 target 中勾选 Use MicroLIB，实现简单，速度慢，兼容性差。
+	2. 代码法：需要实现一个预处理、两个定义、三个函数，实现复杂，速度快，兼容性好。（`usart.c` 文件中实现，直接复制即可）
+2. 实现 fputc 函数。
 
 # 入门篇
 ## GPIO
-### GPIO需要熟悉的知识
-GPIO(General Purpose Input Output)作用：
+### GPIO 需要熟悉的知识
+GPIO (General Purpose Input Output) 作用：
 1. 输入（采集外部器件信息）
 2. 输出（控制外部器件工作）
 
-GPIO电气特性：
-1. 电压工作范围 2V至3.6V
-2. GPIO识别电压范围：CMOS端口（不带FT）：-0.3至1.164V 0,1.833至3.6V 1。
-3. GPIO输出电流：单个IO最大25mA
+GPIO 电气特性：
+1. 电压工作范围 2V 至 3.6V
+2. GPIO 识别电压范围：CMOS 端口（不带 FT）：-0.3 至 1.164V 0, 1.833 至 3.6V 1。
+3. GPIO 输出电流：单个 IO 最大 25mA
 
-STM32引脚类型：电源引脚、晶振引脚、复位引脚、下载引脚、BOOT引脚、GPIO引脚。
+STM32 引脚类型：电源引脚、晶振引脚、复位引脚、下载引脚、BOOT 引脚、GPIO 引脚。
 
-GPIO的8种工作模式：
+GPIO 的 8 种工作模式：
 1. 输入浮空
 2. 输入上拉
 3. 输入下拉
 4. 模拟输入
 5. 开漏输出
-	1. 不能输出高电平，只能输出0或高阻态，除非有内部或外部的上拉
+	1. 不能输出高电平，只能输出 0 或高阻态，除非有内部或外部的上拉
 6. 推挽输出
-	1. 可以输出0和1
+	1. 可以输出 0 和 1
 	2. 驱动能力强
 7. 开漏式复用功能
 8. 推挽式复用功能
 
-GPIO寄存器介绍：
-1. 端口配置低寄存器(GPIOx_CRL) (x=A..E)
-2. 端口配置高寄存器(GPIOx_CRH) (x=A..E)
-3. 端口输入数据寄存器(GPIOx_IDR) (x=A..E)
-4. 端口输出数据寄存器(GPIOx_ODR) (x=A..E)
-5. 端口位设置/清除寄存器(GPIOx_BSRR) (x=A..E)
-6. 端口位清除寄存器(GPIOx_BRR) (x=A..E)
-7. 端口配置锁定寄存器(GPIOx_LCKR) (x=A..E)
+GPIO 寄存器介绍：
+1. 端口配置低寄存器 (GPIOx_CRL) (x=A..E)
+2. 端口配置高寄存器 (GPIOx_CRH) (x=A..E)
+3. 端口输入数据寄存器 (GPIOx_IDR) (x=A..E)
+4. 端口输出数据寄存器 (GPIOx_ODR) (x=A..E)
+5. 端口位设置/清除寄存器 (GPIOx_BSRR) (x=A..E)
+6. 端口位清除寄存器 (GPIOx_BRR) (x=A..E)
+7. 端口配置锁定寄存器 (GPIOx_LCKR) (x=A..E)
 
-ODR寄存器控制输出和BSRR寄存器控制输出的区别：ODR可读可写，寄存器赋值的步骤是读、改、写，BSRR只可写，控制输出直接写。使用ODR在读和修改访问之间产生中断时可能发生风险，BSRR无风险。
+ODR 寄存器控制输出和 BSRR 寄存器控制输出的区别：ODR 可读可写，寄存器赋值的步骤是读、改、写，BSRR 只可写，控制输出直接写。使用 ODR 在读和修改访问之间产生中断时可能发生风险，BSRR 无风险。
 
 ### 通用外设驱动模型
 四步法：
-1. 初始化：时钟设置、参数设置、IO设置、中断设置（开中断、设NVIC）（可选）
+1. 初始化：时钟设置、参数设置、IO 设置、中断设置（开中断、设 NVIC）（可选）
 2. 读函数（可选）
 3. 写函数（可选）
 4. 中断服务函数（可选）
 
-#### GPIO配置步骤：
+#### GPIO 配置步骤：
 1. 初始化
-	1. 使能时钟`__HAL_RCC_GPIOx_CLK_ENABLE()`
-	2. 设置工作模式`HAL_GPIO_Init()`
+	1. 使能时钟 `__HAL_RCC_GPIOx_CLK_ENABLE()`
+	2. 设置工作模式 `HAL_GPIO_Init()`
 2. 设置输出状态（可选）`HAL_GPIO_WritePin()`、`HAL_GPIO_TogglePin()`
 3. 读取输入状态（可选）`HAL_GPIO_ReadPin()`
 
@@ -175,45 +175,45 @@ ODR寄存器控制输出和BSRR寄存器控制输出的区别：ODR可读可写�
 1. 实时控制：在确定时间内对相应事件作出响应。
 2. 故障处理：检测到故障需要第一时间处理。
 3. 数据传输：不知道数据什么时候来，如串口数据接收。
-高效处理紧急程序，不会一直占用CPU资源。
+高效处理紧急程序，不会一直占用 CPU 资源。
 
 ### NVIC
 Nested vectored interrupt controller，嵌套向量中断控制器，属于内核。
-NVIC支持：256个中断（16内核+240外部），支持256个优先级，允许裁剪。（ST公司裁剪为16个）
+NVIC 支持：256 个中断（16 内核+240 外部），支持 256 个优先级，允许裁剪。（ST 公司裁剪为 16 个）
 
-stm32中断优先级基本概念：
+stm32 中断优先级基本概念：
 1. 抢占优先级（pre）：高抢占优先级可以打断正在执行的低抢占优先级中断。
 2. 响应优先级（sub）：当抢占优先级相同时，响应优先级高的先执行，但是不能互相打断。
 3. 自然优先级：抢占和响应都相同的情况下，自然优先级（中断向量表的优先级）越高的，先执行。
 
-stm32中断优先级分组：通过配置`AIRCR[10:8]`对`IPRx bit[7:4]`的四个位进行抢占优先级数目和响应优先级分配。
+stm32 中断优先级分组：通过配置 `AIRCR[10:8]` 对 `IPRx bit[7:4]` 的四个位进行抢占优先级数目和响应优先级分配。
 
-STM32 NVIC的使用：
-1. 设置中断分组`AIRCR[10:8], HAL_NVIC_SetPriorityGrouping`
-2. 设置中断优先级`IPRx bit[7:4], HAL_NVIC_SetPriority`
-3. 使能中断`ISERx, HAL_NVIC_EnableIRQ`
+STM32 NVIC 的使用：
+1. 设置中断分组 `AIRCR[10:8], HAL_NVIC_SetPriorityGrouping`
+2. 设置中断优先级 `IPRx bit[7:4], HAL_NVIC_SetPriority`
+3. 使能中断 `ISERx, HAL_NVIC_EnableIRQ`
 
 ### EXTI
-External(Extended) interrupt/event Controller，外部（扩展）中断事件控制器。包含20个产生事件/中断请求的边沿检测器，即总共：20条EXTI线（F1）。
+External (Extended) interrupt/event Controller，外部（扩展）中断事件控制器。包含 20 个产生事件/中断请求的边沿检测器，即总共：20 条 EXTI 线（F1）。
 
-EXTI寄存器：
-1. 中断屏蔽寄存器(EXTI_IMR)
-2. 事件屏蔽寄存器(EXTI_EMR)
-3. 上升沿触发选择寄存器(EXTI_RTSR)
-4. 下降沿触发选择寄存器(EXTI_FTSR)
-5. 软件中断事件寄存器(EXTI_SWIER)
-6. 挂起寄存器(EXTI_PR) 
+EXTI 寄存器：
+1. 中断屏蔽寄存器 (EXTI_IMR)
+2. 事件屏蔽寄存器 (EXTI_EMR)
+3. 上升沿触发选择寄存器 (EXTI_RTSR)
+4. 下降沿触发选择寄存器 (EXTI_FTSR)
+5. 软件中断事件寄存器 (EXTI_SWIER)
+6. 挂起寄存器 (EXTI_PR) 
 
-AFIO：Alternate Function IO，即复用功能IO，主要用于重映射和外部中断映射配置（F1）：
-1. 调试IO配置：AFIO_MAPR[26:24]，配置JTAG/SWD的开关状态
-2. 重映射配置：AFIO_MAPR，部分外设IO重映射配置
-3. 外部中断配置：AFIO_EXTICR1~4，配置EXTI中断线0~15对应到哪个具体IO口。
-特别注意：配置AFIO寄存器之前要使能AFIO时钟，方法如下：`__HAL_RCC_AFIO_CLK_ENABLE();对应RCC_APB2ENR寄存器 位0`
+AFIO：Alternate Function IO，即复用功能 IO，主要用于重映射和外部中断映射配置（F1）：
+1. 调试 IO 配置：AFIO_MAPR[26:24]，配置 JTAG/SWD 的开关状态
+2. 重映射配置：AFIO_MAPR，部分外设 IO 重映射配置
+3. 外部中断配置：AFIO_EXTICR1~4，配置 EXTI 中断线 0~15 对应到哪个具体 IO 口。
+特别注意：配置 AFIO 寄存器之前要使能 AFIO 时钟，方法如下：`__HAL_RCC_AFIO_CLK_ENABLE();对应RCC_APB2ENR寄存器 位0`
 
 中断的产生：
-1. EXTI中断
-	1. GPIO设置输入模式。
-	2. AFIO（F1）或SYSCFG（其他）设置EXTI和IO映射关系。
+1. EXTI 中断
+	1. GPIO 设置输入模式。
+	2. AFIO（F1）或 SYSCFG（其他）设置 EXTI 和 IO 映射关系。
 	3. EXTI。
 	4. NVIC：设置中断分组、优先级、使能。
 	5. CPU：按优先级顺序，依次处理中断。
@@ -222,111 +222,111 @@ AFIO：Alternate Function IO，即复用功能IO，主要用于重映射和外�
 	2. NVIC：设置中断分组、优先级、使能。
 	3. CPU：按优先级顺序，依次处理中断。
 
-STM32 EXTI的配置步骤（GPIO外部中断）：
-1. 使能GPIO时钟
-2. 设置GPIO输入模式
-3. 使能AFIO/SYSCFG时钟
-4. 设置EXTI和IO对应关系
-5. 设置EXTI屏蔽，上/下沿
-6. 设置NVIC
+STM32 EXTI 的配置步骤（GPIO 外部中断）：
+1. 使能 GPIO 时钟
+2. 设置 GPIO 输入模式
+3. 使能 AFIO/SYSCFG 时钟
+4. 设置 EXTI 和 IO 对应关系
+5. 设置 EXTI 屏蔽，上/下沿
+6. 设置 NVIC
 7. 设计中断服务函数
-注：HAL库步骤2~5使用`HAL_GPIO_Init`一步到位。
+注：HAL 库步骤 2~5 使用 `HAL_GPIO_Init` 一步到位。
 
-STM32 EXTI的HAL库配置步骤（GPIO外部中断）：
-1. 使能GPIO时钟`__HAL_RCC_GPIOx_CLK_ENABLE`
-2. GPIO/AFIO(SYSCFG)/EXTI `HAL_GPIO_Init`
-3. 设置中断分组`HAL_NVIC_SetPriorityGrouping`，**此函数只需要设置一次**
-4. 设置中断优先级`HAL_NVIC_SetPriority`
-5. 使能中断`HAL_NVIC_EnableIRQ`
-6. 设计中断服务函数`EXTIx_IRQHandler`，中断服务函数，清中断标志
-   STM32仅有EXTI0~4、EXTI9_5、EXTI15_10，7个外部中断服务函数
+STM32 EXTI 的 HAL 库配置步骤（GPIO 外部中断）：
+1. 使能 GPIO 时钟 `__HAL_RCC_GPIOx_CLK_ENABLE`
+2. GPIO/AFIO (SYSCFG)/EXTI `HAL_GPIO_Init`
+3. 设置中断分组 `HAL_NVIC_SetPriorityGrouping`，**此函数只需要设置一次**
+4. 设置中断优先级 `HAL_NVIC_SetPriority`
+5. 使能中断 `HAL_NVIC_EnableIRQ`
+6. 设计中断服务函数 `EXTIx_IRQHandler`，中断服务函数，清中断标志
+   STM32 仅有 EXTI0~4、EXTI9_5、EXTI15_10，7 个外部中断服务函数
 
-HAL库中断回调处理机制介绍：
+HAL 库中断回调处理机制介绍：
 1. 中断服务函数
-2. HAL库中断处理公用函数
-3. HAL库数据处理回调函数（函数名以Callback结尾）
+2. HAL 库中断处理公用函数
+3. HAL 库数据处理回调函数（函数名以 Callback 结尾）
 
 ## 串口通信
-串口：即串行通信接口，指按位发送和接收的接口。如：RS-232/422/485等。
+串口：即串行通信接口，指按位发送和接收的接口。如：RS-232/422/485 等。
 
 常见的串行通信接口：
 
 | 通信接口                     | 接口引脚                                                     | 数据同步方式 | 数据传输方向 |
 | ---------------------------- | ------------------------------------------------------------ | ------------ | ------------ |
-| UART<br />（通用异步收发器） | TXD:公共端<br />RXD：接收端<br />GND：公共地                 | 异步通信     | 全双工       |
-| 1-wire                       | DQ:发送/接收端                                               | 异步通信     | 半双工       |
-| IIC                          | SCL:同步时钟<br />SDA:数据输入/输出端                        | 同步通信     | 半双工       |
-| SPI                          | SCK:同步时钟<br />MISO:主机输入，从机输出<br />MOSI:主机输出，从机输入<br />CS:片选信号 | 同步通信     | 全双工       |
+| UART<br />（通用异步收发器） | TXD: 公共端<br />RXD：接收端<br />GND：公共地                 | 异步通信     | 全双工       |
+| 1-wire                       | DQ: 发送/接收端                                               | 异步通信     | 半双工       |
+| IIC                          | SCL: 同步时钟<br />SDA: 数据输入/输出端                        | 同步通信     | 半双工       |
+| SPI                          | SCK: 同步时钟<br />MISO: 主机输入，从机输出<br />MOSI: 主机输出，从机输入<br />CS: 片选信号 | 同步通信     | 全双工       |
 
 ### RS232
 RS-232 电平与 CMOS/TTL 电平对比：
 
-| 类型       | 逻辑1     | 逻辑0     |
+| 类型       | 逻辑 1     | 逻辑 0     |
 | ---------- | --------- | --------- |
-| RS232      | -15V至-3V | +3V至+15V |
-| CMOS(3.3V) | 3.3V      | 0V        |
-| TTL(5V)    | 5V        | 0V        |
-结论：CMOS/TTL电平不能与RS232电平直接交换信息。
+| RS232      | -15V 至-3V | +3V 至+15V |
+| CMOS (3.3V) | 3.3V      | 0V        |
+| TTL (5V)    | 5V        | 0V        |
+结论：CMOS/TTL 电平不能与 RS232 电平直接交换信息。
 
 
 ### USART
 Universal synchronous asynchronous receiver transmitter，通用同步异步收发器。
-Universal asynchronous receiver transmitter，通用异步收发器，USART裁剪调同步功能。
+Universal asynchronous receiver transmitter，通用异步收发器，USART 裁剪调同步功能。
 
-F1波特率计算公式：$$baud=\frac{f_{ck}}{16*USARTDIV}$$
+F1 波特率计算公式：$$baud=\frac{f_{ck}}{16*USARTDIV}$$
 
-USART/UART异步通信配置步骤：
+USART/UART 异步通信配置步骤：
 1. 配置串口工作参数 `HAL_UART_Init()`
-2. 串口底层初始化 `HAL_UART_MspInit()`配置GPIO、NVIC、CLOCK等
+2. 串口底层初始化 `HAL_UART_MspInit()` 配置 GPIO、NVIC、CLOCK 等
 3. 开启串口异步接收中断 `HAL_UART_Receive_IT()`
 4. 设置优先级，使能中断 `HAL_NVIC_SetPriority()`、`HAL_NVIC_EnableIRQ()`
 5. 编写中断服务函数 `USARTx_IRQHandler()`、`UARTx_IRQHandler()`
-6. 串口数据发送 寄存器 `USART_DR` HAL库 `HAL_UART_Transmit()`
+6. 串口数据发送 寄存器 `USART_DR` HAL 库 `HAL_UART_Transmit()`
 
 ## IWDG
-IWDG简介：
-- IWDG全称：Independent watchdog，即独立看门狗。
-- IWDG本质：能产生**系统复位信号**的计数器。
-- IWDG特性：独立的计数器，时钟由独立的RC振荡器提供（可在待机和停止模式运行），看门狗被激活后，当递减计数器计数到0x000时产生复位。
-- 喂狗：计数器计到0之前，重装载计数器的值，防止复位。
+IWDG 简介：
+- IWDG 全称：Independent watchdog，即独立看门狗。
+- IWDG 本质：能产生**系统复位信号**的计数器。
+- IWDG 特性：独立的计数器，时钟由独立的 RC 振荡器提供（可在待机和停止模式运行），看门狗被激活后，当递减计数器计数到 0x000 时产生复位。
+- 喂狗：计数器计到 0 之前，重装载计数器的值，防止复位。
 
-IWDG作用：
+IWDG 作用：
 1. 异常：外界电磁干扰或自身系统（硬件或软件）异常，造成程序跑飞，如：陷入某个不正常的死循环，打断正常的程序运行。
-2. IWDG作用：主要用于检测外界电磁干扰，或硬件异常导致的程序跑飞问题。
-3. 应用：在一些需要高稳定性的产品中，并且对时间精度要求较低（RC振荡器精度较低）的场合。
+2. IWDG 作用：主要用于检测外界电磁干扰，或硬件异常导致的程序跑飞问题。
+3. 应用：在一些需要高稳定性的产品中，并且对时间精度要求较低（RC 振荡器精度较低）的场合。
 **注意：独立看门狗是异常处理的最后手段，不可依赖，应在设计时尽量避免异常。**
 
-IWDG溢出时间计算
-IWDG溢出时间计算公式：$$T_{out}=\frac{psc*rlr}{f_{IWDG}}$$
-其中，$T_{out}$是看门狗溢出时间，$f_{IWDG}$是看门狗的时钟源频率，$psc$是看门狗预分频系数，$rlr$是看门狗重装载值。
+IWDG 溢出时间计算
+IWDG 溢出时间计算公式：$$T_{out}=\frac{psc*rlr}{f_{IWDG}}$$
+其中，$T_{out}$ 是看门狗溢出时间，$f_{IWDG}$ 是看门狗的时钟源频率，$psc$ 是看门狗预分频系数，$rlr$ 是看门狗重装载值。
 
-IWDG配置步骤：
-1. 取消PR/RLR寄存器写保护，设置IWDG预分频系数和重装载值，启动IWDG `HAL_IWDG_Init()`
-2. 及时喂狗，即写入0xAAAA到IWDG_KR `HAL_IWDG_Refresh()`
+IWDG 配置步骤：
+1. 取消 PR/RLR 寄存器写保护，设置 IWDG 预分频系数和重装载值，启动 IWDG `HAL_IWDG_Init()`
+2. 及时喂狗，即写入 0xAAAA 到 IWDG_KR `HAL_IWDG_Refresh()`
 
 ## WWDG
 Window watchdog，即窗口看门狗。
-WWDG简介：
-- WWDG本质：能产生**系统复位信号**和**提前唤醒中断**的计数器。
-- WWDG特性：
+WWDG 简介：
+- WWDG 本质：能产生**系统复位信号**和**提前唤醒中断**的计数器。
+- WWDG 特性：
 	- 递减的计数器。
-	- 当递减计数器值从0x40减到0x3F时复位。
-	- 计数器的值大于W[6:0]值时喂狗会复位。
-	- 提前唤醒中断（EWI）：当递减计数器等于0x40时可产生。
+	- 当递减计数器值从 0x40 减到 0x3F 时复位。
+	- 计数器的值大于 W[6:0]值时喂狗会复位。
+	- 提前唤醒中断（EWI）：当递减计数器等于 0x40 时可产生。
 - 喂狗：在窗口期内重装载计数器的值，防止复位。
 	- $W[6:0]\ge窗口期>0x3F]$
 
-WWDG作用：监测单片机运行时效是否精准，主要检测**软件异常**。
-WWDG应用：需要精准监测程序运行时间的场合。
+WWDG 作用：监测单片机运行时效是否精准，主要检测**软件异常**。
+WWDG 应用：需要精准监测程序运行时间的场合。
 
-WWDG超时时间计算：$$T_{out}\frac{4096*2^{WDGTB}*(T[5:0]+1)}{F_{wwdg}}$$
-其中，$T_{out}$是WWDG超时时间（没喂狗）；$F_{wwdg}$是WWDG的时钟源频率；4096是WWDG固定的预分频系数；$2^{WDGTB}$是WWDG_CFR寄存器设置的预分频系数值；T[5:0]是WWDG计数器低6位。
+WWDG 超时时间计算：$$T_{out}\frac{4096*2^{WDGTB}*(T[5:0]+1)}{F_{wwdg}}$$
+其中，$T_{out}$ 是 WWDG 超时时间（没喂狗）；$F_{wwdg}$ 是 WWDG 的时钟源频率；4096 是 WWDG 固定的预分频系数；$2^{WDGTB}$ 是 WWDG_CFR 寄存器设置的预分频系数值；T[5:0]是 WWDG 计数器低 6 位。
 
-WWDG配置步骤：
-1. WWDG工作参数初始化：`HAL_WWDG_Init()`
-2. WWDG Msp初始化：`HAL_WWDG_MspInit()`配置NVIC、CLOCK等
+WWDG 配置步骤：
+1. WWDG 工作参数初始化：`HAL_WWDG_Init()`
+2. WWDG Msp 初始化：`HAL_WWDG_MspInit()` 配置 NVIC、CLOCK 等
 3. 设置优先级，使能中断：`HAL_NVIC_SetPriority()`、`HAL_NVIC_EnableIRQ()`
-4. 编写中断服务函数：`WWDG_IRQHandler()`->`HAL_WWDG_IRQHandler`
+4. 编写中断服务函数：`WWDG_IRQHandler()` -> `HAL_WWDG_IRQHandler`
 5. 重定义提前唤醒回调函数：`HAL_WWDG_EarlyWakeupCallback()`
 6. 在窗口期喂狗：`HAL_WWDG_Refresh()`
 
@@ -334,23 +334,23 @@ IWDG 和 WWDG 对比：
 
 | 对比点         | 独立看门狗                   | 窗口看门狗                       |
 | -------------- | ---------------------------- | -------------------------------- |
-| 时钟源         | LSI（40KHz或32KHz）          | PCLK1或PCLK3                     |
-| 复位条件       | 递减计数到0                  | 计数值大于W[6:0]值喂狗或减到0x3F |
-| 中断           | 没有中断                     | 计数值减到0x40可产生中断         |
-| 递减计数器位数 | 12位（最大计数范围：4096~0） | 7位（最大计数范围：127~63）      |
+| 时钟源         | LSI（40KHz 或 32KHz）          | PCLK1 或 PCLK3                     |
+| 复位条件       | 递减计数到 0                  | 计数值大于 W[6:0]值喂狗或减到 0x3F |
+| 中断           | 没有中断                     | 计数值减到 0x40 可产生中断         |
+| 递减计数器位数 | 12 位（最大计数范围：4096~0） | 7 位（最大计数范围：127~63）      |
 | 应用场合       | 防止程序跑飞，死循环，死机   | 检测程序时效，防止软件异常                                 |
 
 ## TIMER
 ### 定时器概述
-软件定时原理：使用纯软件（CPU死等）方式实现定时（延时）功能。
+软件定时原理：使用纯软件（CPU 死等）方式实现定时（延时）功能。
 
 软件延时缺点：
 1. 延时不精准
-2. CPU死等
+2. CPU 死等
 
 定时器定时：使用精准的时基，通过硬件的方式，实现定时功能。
 
-stm32定时器分类：
+stm32 定时器分类：
 1. 常规定时器
 	1. 基本定时器
 	2. 通用定时器
@@ -360,7 +360,7 @@ stm32定时器分类：
 	2. 窗口看门狗
 	3. 实时时钟
 	4. 低功耗定时器
-3. 内核定时器 SysTick定时器
+3. 内核定时器 SysTick 定时器
 
 stm32 基本、通用、高级定时器功能整体的区别：
 
@@ -374,66 +374,66 @@ stm32 基本、通用、高级定时器功能整体的区别：
 基本定时器简介：
 1. 基本定时器：TIM6/TIM7
 2. 主要特性：
-	1. 16位递增计数器（计数值：0~65535）
-	2. 16位预分频器（分频系数：1~65536），分频系数为寄存器值+1
-	3. 可用于触发DAC
+	1. 16 位递增计数器（计数值：0~65535）
+	2. 16 位预分频器（分频系数：1~65536），分频系数为寄存器值+1
+	3. 可用于触发 DAC
 
 定时器中断实验相关寄存器（F1）：
-1. TIM6和TIM7控制寄存器1（TIMx_CR1）
-	1. 位7 ARPE（Auto-reload preload enable)
-		1. 0：TIMx_ARR寄存器没有缓冲（对寄存器写入后直接生效）。
-		2. 1：TIMx_ARR寄存器具有缓冲（更新事件发生后才写入影子寄存器生效）。
+1. TIM6 和 TIM7 控制寄存器 1（TIMx_CR1）
+	1. 位 7 ARPE（Auto-reload preload enable)
+		1. 0：TIMx_ARR 寄存器没有缓冲（对寄存器写入后直接生效）。
+		2. 1：TIMx_ARR 寄存器具有缓冲（更新事件发生后才写入影子寄存器生效）。
 		3. 作用：在微妙级计时前后计时时间发生变化时，等待更新事件发生后对寄存器的写入会耗费一定时间，当具有缓冲时可以在更新时间发生前写入寄存器，增加计时精度。
-	2. 位0 CEN（Counter Enable）
-2. TIM6和TIM7 DMA/中断使能寄存器（TIMx_DIER）
-3. TIM6和TIM7状态寄存器（TIMx_SR） 用于判断是否发生了更新中断，由硬件置1，软件清零
-4. TIM6和TIM7计数器（TIMx_CNT）计数器值可读可写
-5. TIM6和TIM7预分频器（TIMx_PSC）分频系数为PSC值+1
+	2. 位 0 CEN（Counter Enable）
+2. TIM6 和 TIM7 DMA/中断使能寄存器（TIMx_DIER）
+3. TIM6 和 TIM7 状态寄存器（TIMx_SR） 用于判断是否发生了更新中断，由硬件置 1，软件清零
+4. TIM6 和 TIM7 计数器（TIMx_CNT）计数器值可读可写
+5. TIM6 和 TIM7 预分频器（TIMx_PSC）分频系数为 PSC 值+1
 
 定时器溢出时间的计算方法：$$T_{out}=\frac{(ARR+1)*(PSC+1)}{F_t}$$
-其中，$T_{out}$是定时器溢出时间，$F_t$是定时器的时钟源频率，$ARR$是自动重装载寄存器的值，$PSC$是预分频器寄存器的值。（ARR+1是因为当设置ARR为0时也要计一个数）
+其中，$T_{out}$ 是定时器溢出时间，$F_t$ 是定时器的时钟源频率，$ARR$ 是自动重装载寄存器的值，$PSC$ 是预分频器寄存器的值。（ARR+1 是因为当设置 ARR 为 0 时也要计一个数）
 
 定时器中断实验配置步骤：
 1. 配置定时器基础工作参数 `HAL_TIM_Base_Init()`
-2. 定时器基础MSP初始化 `HAL_TIM_Base_MspInit()`配置NVIC、CLOCK等
+2. 定时器基础 MSP 初始化 `HAL_TIM_Base_MspInit()` 配置 NVIC、CLOCK 等
 3. 使能更新中断并启动计数器 `HAL_TIM_Base_Start_IT()`
 4. 设置优先级，使能中断 `HAL_NVIC_SetPriority()`、`HAL_NVIC_EnableIRQ()`
-5. 编写中断服务函数 `TIMx_IRQHandler()`等->`HAL_TIM_IRQHandler()`
+5. 编写中断服务函数 `TIMx_IRQHandler()` 等-> `HAL_TIM_IRQHandler()`
 6. 编写定时器更新中断回调函数 `HAL_TIM_PeriodElapsedCallback()`
 
 ### 通用定时器
 #### 通用定时器简介（F1）
-1. 通用定时器TIM2/TIM3/TIM4/TIM5
+1. 通用定时器 TIM2/TIM3/TIM4/TIM5
 2. 主要特性（加粗为相对基本定时器的新特性）
 	1. 16 位递增、**递减、中心对齐**计数器（计数值：0~65535）
 		1. 递增、递减计数器又称边沿对齐计数器
-	2. 16位预分频器（分频系数：1~65536）
-	3. 可用于触发DAC、**ADC**
-	4. 在更新时间、**触发事件、输入捕获、输出比较**时，会产生中断/DMA请求
-	5. **4个独立通道，可用于：输入捕获、输出比较、输出PWM、单脉冲模式**
+	2. 16 位预分频器（分频系数：1~65536）
+	3. 可用于触发 DAC、**ADC**
+	4. 在更新时间、**触发事件、输入捕获、输出比较**时，会产生中断/DMA 请求
+	5. **4 个独立通道，可用于：输入捕获、输出比较、输出 PWM、单脉冲模式**
 	6. **使用外部信号控制定时器且可实现多个定时器互连的同步电路**（定时器的级联）
 	7. **支持编码器和霍尔传感器等**
 
 计数器时钟源：
-1. 内部时钟（CK_INT），来自外部总线APB提供的时钟（是否x2需要看预分频器）
-2. 外部时钟模式1：外部输入引脚（TIx），来自定时器通道1或者通道2引脚的信号
-3. 外部时钟模式2：外部触发输入（ETR），来自可以复用为TIMx_ETR的IO引脚
+1. 内部时钟（CK_INT），来自外部总线 APB 提供的时钟（是否 x2 需要看预分频器）
+2. 外部时钟模式 1：外部输入引脚（TIx），来自定时器通道 1 或者通道 2 引脚的信号
+3. 外部时钟模式 2：外部触发输入（ETR），来自可以复用为 TIMx_ETR 的 IO 引脚
 4. 内部触发输入（ITRx），用于与芯片内部其它通用/高级定时器级联
 
-#### 通用定时器PWM输出实验
-通用定时器输出PWM原理：
-假设采用递增技术模式，ARR为自动重装载寄存器的值，CCRx为捕获/比较寄存器x的值，当CNT<CCRx，IO输出0，当CNT>=CCRx，IO输出1。此时，PWM波周期或频率由ARR决定，PWM波占空比由CCRx决定。
+#### 通用定时器 PWM 输出实验
+通用定时器输出 PWM 原理：
+假设采用递增技术模式，ARR 为自动重装载寄存器的值，CCRx 为捕获/比较寄存器 x 的值，当 CNT<CCRx，IO输出0，当CNT>=CCRx，IO 输出 1。此时，PWM 波周期或频率由 ARR 决定，PWM 波占空比由 CCRx 决定。
 
-通用定时器PWM输出实验配置步骤：
+通用定时器 PWM 输出实验配置步骤：
 1. 配置定时器基础工作参数 `HAL_TIM_PWM_Init()`
-2. 定时器PWM输出MSP初始化 `HAL_TIM_PWM_MspInit()`配置NVIC、CLOCK、GPIO等
-3. 配置PWM模式/比较值等 `HAL_TIM_PWM_ConfigChannel()`
+2. 定时器 PWM 输出 MSP 初始化 `HAL_TIM_PWM_MspInit()` 配置 NVIC、CLOCK、GPIO 等
+3. 配置 PWM 模式/比较值等 `HAL_TIM_PWM_ConfigChannel()`
 4. 使能输出并启动计数器 `HAL_TIM_PWM_Start()`
 5. 修改比较值控制占空比（可选） `__HAL_TIM_SET_COMPARE()`
 6. 使能通道预装载（可选）`__HAL_TIM_ENABLE_OCxPRELOAD()`
 
-PWM周期/频率的计算方法同定时器溢出时间的计算方法：$$T_{out}=\frac{(ARR+1)*(PSC+1)}{F_t}$$
-其中，$T_{out}$是定时器溢出时间，$F_t$是定时器的时钟源频率，$ARR$是自动重装载寄存器的值，$PSC$是预分频器寄存器的值。（ARR+1是因为当设置ARR为0时也要计一个数）
+PWM 周期/频率的计算方法同定时器溢出时间的计算方法：$$T_{out}=\frac{(ARR+1)*(PSC+1)}{F_t}$$
+其中，$T_{out}$ 是定时器溢出时间，$F_t$ 是定时器的时钟源频率，$ARR$ 是自动重装载寄存器的值，$PSC$ 是预分频器寄存器的值。（ARR+1 是因为当设置 ARR 为 0 时也要计一个数）
 
 #### 通用定时器输入捕获实验
 通用定时器输入捕获脉宽测量原理：
@@ -507,8 +507,8 @@ PWM周期/频率的计算方法同定时器溢出时间的计算方法：$$T_{ou
 3. 代入选择的公式计算。
 
 高级定时器互补输出带死区控制实验配置步骤：
-1. 配置定时器基础工作参数 `HAL_TIM_PWM_Init()`
-2. 定时器 PWM 输出 MSP 初始化 `HAL_TIM_PWM_MspInit()`
+1. 配置定时器基础工作参数 `HAL_TIM_PWM_Init ()`
+2. 定时器 PWM 输出 MSP 初始化 `HAL_TIM_PWM_MspInit ()`
 3. 配置 PWM 模式/比较值等 `HAL_TIM_PWM_ConfigChannel()`
 4. 配置刹车功能、死区时间等 `HAL_TIMx_ConfigBreakDeadTime()`
 5. 使能输出、主输出、计数器 `HAL_TIM_PWM_Start()`
@@ -628,13 +628,13 @@ USMART 主要特点：
 4. 支持函数返回值显示且可对格式进行设置
 5. 支持函数执行时间计算
 
-修改 `usmart_port.c/.h` 即可完成移植，修改 `usmart_config.c` 即可添加自己想要调用的函数。
+修改 `usmart_port. c/. h` 即可完成移植，修改 `usmart_config. c` 即可添加自己想要调用的函数。
 
 USMART 移植步骤：
 1. 获取 USMART 组件
 2. 添加到工程：添加全部组件到工程，4 个文件，设置好路径关联
 3. 适配硬件：修改调试串口和定时器，以适配自己的硬件
-4. 添加执行函数：在 `usmart_config.c` 中添加自己需要的执行函数
+4. 添加执行函数：在 `usmart_config. c` 中添加自己需要的执行函数
 5. 通过串口交互：烧录移植好的 USMART 组件，可以通过串口反复测试目标函数
 
 开启后可以通过串口发送 `?` 获取帮助信息
@@ -658,11 +658,11 @@ USMART 移植步骤：
 
 | 驱动函数                       | 关联寄存器        | 功能描述              |
 | ------------------------------ | ----------------- | --------------------- |
-| HAL_RTC_Init(...)              | CRL/CRH/PRLH/PRLL | 初始化RTC             |
-| HAL_RTC_MspInit(...)           | 初始化回调        | 使能RTC时钟           |
-| HAL_RCC_OscConfig(...)         | RCC_CR/PWR_CR     | 开启LSE时钟源         |
-| HAL_RCCEx_PeriphCLKConfig(...) | RCC_BDCR          | 设置RTC时钟源为LSE    |
-| HAL_PWR_EnableBkUpAccess(...)  | PWR_CR            | 使能备份域的访问权限  |
+| HAL_RTC_Init (...)              | CRL/CRH/PRLH/PRLL | 初始化 RTC             |
+| HAL_RTC_MspInit (...)           | 初始化回调        | 使能 RTC 时钟           |
+| HAL_RCC_OscConfig (...)         | RCC_CR/PWR_CR     | 开启 LSE 时钟源         |
+| HAL_RCCEx_PeriphCLKConfig (...) | RCC_BDCR          | 设置 RTC 时钟源为 LSE    |
+| HAL_PWR_EnableBkUpAccess (...)  | PWR_CR            | 使能备份域的访问权限  |
 | HAL_RTCEx_BKUPWirte/Read ()    | BKP_DRx           | 读/写备份与数据寄存器 |
 
 需要开启的时钟源：
@@ -715,7 +715,7 @@ STM32 具有运行、睡眠、停止和待机四种工作模式。上电后默�
 | 正常模式 | 所有外设正常工作                                   | 0        | 51mA               |
 | 睡眠模式 | CPU 时钟关闭                                       | 1.8us    | 29.5mA             |
 | 停止模式 |1.8V 时钟区域关闭，电压调节器低功耗 <br> 存储器供电，程序不会复位| 5.4us    | 35uA               |
-|待机模式|1.8V时钟区域关闭，电压调节器关闭 <br>存储器断电，程序复位|50us|3.8uA|
+|待机模式|1.8V 时钟区域关闭，电压调节器关闭 <br>存储器断电，程序复位|50us|3.8uA|
 
 睡眠模式配置步骤：
 1. 初始化 WKUP 为中断触发源：参考外部中断引脚初始化
@@ -772,7 +772,7 @@ DMA 传输无需 CPU 直接控制传输，也没有中断处理方式那样保�
 5. DMA 中断使用：`HAL_NVIC_EnableIRQ`、`HAL_NVIC_SetPriority`，编写中断服务函数 `xxx_IRQHandler`
 
 ## ADC
-ADC（Analog Digital Converter）
+ADC（Analog-to-Digital Converter）
 
 常见的 ADC 类型
 
@@ -801,11 +801,11 @@ A/D 转换被组织为两组：规则组（常规转换组）和注入组（注�
 PCLK2（APB2 总线上的时钟）-> ADCPRE[1:0]（RCC_CFGR 寄存器，分频系数：2/4/6/8） -> ADCCLK（ADC 最大时钟频率为 14MHz）
 
 如何设置转换时间？
-ADC 转换时间：$T_{CONV}=采样时间 + 12.5个周期$（采样时间可通过 SMPx[2:0]位设置，x=0~17）
+ADC 转换时间：$T_{CONV}=采样时间 + 12.5 个周期$（采样时间可通过 SMPx[2:0]位设置，x=0~17）
 
 #### 数据寄存器
 规则组（16 个）共用一个寄存器，转换结果按顺序输出至规则数据寄存器 `ADCx_DR`（32 位），独立模式只用到低 16 位。
-注入组（4 个）刚好对应四个寄存器，转换结果输出至注入数据寄存器 `ADCx_JDRy(y=1~4)`（16 位）
+注入组（4 个）刚好对应四个寄存器，转换结果输出至注入数据寄存器 `ADCx_JDRy (y=1~4)`（16 位）
 由 `ADCx_CR2` 寄存器的 ALIGN 位设置数据对齐方式，可选择右对齐或左对齐。
 
 #### 中断
@@ -826,9 +826,9 @@ DMA 请求（只适用于规则组）：规则组每个通道转换结束后，�
 | 模式组合     | 功能 |
 | ------------ | ---- |
 | 单次转换模式（不扫描） |只转换一个通道，而且是一次，需等待下一次触发|
-|单次转换模式（扫描）|ADC_SQRx和ADC_JSQR选中的所有通道都转换一次 |
+|单次转换模式（扫描）|ADC_SQRx 和 ADC_JSQR 选中的所有通道都转换一次 |
 |连续转换模式（不扫描）|只会转换一个通道，转换完后会自动执行下一次转换|
-|连续转换模式（扫描）|ADC_SQRx和ADC_JSQR选中的所有通道都转换一次，并自动进入下一轮转换|
+|连续转换模式（扫描）|ADC_SQRx 和 ADC_JSQR 选中的所有通道都转换一次，并自动进入下一轮转换|
 
 ### 单通道 ADC 采集实验
 单通道 ADC 采集实验配置步骤：
@@ -870,4 +870,7 @@ $V_{SENSE}$ 是 ADC 采集到内部温度传感器的电压值
 
 ### 光敏传感器实验
 光敏二极管核心是一个 PN 结，对光强非常敏感，单向导电性，工作时需加**反向电压**。无光照时，反向电流很小（一般小于 0.1 微安），称为暗电流；有光照时，光的强度越大，反向电流越大，形成光电流（非线性）。利用电流变化的特点，串联一个电阻，就可以得到电压的变化，通过 ADC 读取，从而知道光强变化。
+
+## DAC
+Digital-to-Analog Converter 
 
