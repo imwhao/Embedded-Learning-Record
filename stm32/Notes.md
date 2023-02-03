@@ -352,9 +352,9 @@ IWDG 和 WWDG 对比：
 
 stm32 定时器分类：
 1. 常规定时器
-	1. 基本定时器
-	2. 通用定时器
-	3. 高级定时器
+	1. 基本定时器 TIM6/TIM7
+	2. 通用定时器 TIM2/TIM3/TIM4/TIM5
+	3. 高级定时器 TIM1/TIM8
 2. 专用定时器
 	1. 独立看门狗
 	2. 窗口看门狗
@@ -873,4 +873,57 @@ $V_{SENSE}$ 是 ADC 采集到内部温度传感器的电压值
 
 ## DAC
 Digital-to-Analog Converter 
+
+### DAC 工作原理
+#### 参考电压/模拟部分电压
+DAC 供电电源：$V_{SSA}、V_{DDA}(2.4V \le V_{DDA} \le 3.6V)$
+DAC 输出电压范围：$V_{REF-} \le V_{out} \le V_{REF+}(即 0V \le V_{OUT} \le 3.3V)$
+
+#### DAC 数据格式
+DAC 数据格式：支持 8/12 位模式
+1. 8 位模式：只能右对齐 `DHR8Rx` 、`DHR8RD`（双 DAC 通道转换用）
+2. 12 位模式
+	1. 右对齐 `DHR12Rx`、`DHR12RD`（双 DAC 通道转换用）
+	2. 左对齐 `DHR12Lx`、`DHR12LD`（双 DAC 通道转换用）
+
+#### 触发源
+三种触发转换的方式：自动触发、软件触发、外部事件触发。
+
+#### DMA 请求
+只能由外部事件触发产生 DMA 请求。
+
+#### DAC 输出电压
+12 位模式下，DAC 输出电压计算方法：
+$$
+DAC输出电压=(\frac{DORx}{4096}*V_{REF+})
+$$
+8 位模式下，DAC 输出电压计算方法：
+$$
+DAC输出电压=(\frac{DORx}{256}*V_{REF+})
+$$
+
+### DAC 输出实验
+#### DAC 输出实验配置步骤
+1. 初始化 DAC：`HAL_DAC_Init()`
+2. DAC MSP 初始化：`HAL_DAC_MspInit()` 配置 NVIC、CLOCK、GPIO 等
+3. 配置 DAC 相应通道相关参数：`HAL_DAC_ConfigChannel()`
+4. 启动 D/A 转换：`HAL_DAC_Start()`
+5. 设置输出数字量：`HAL_DAC_SetValue()`
+6. 读取通道输出数字量（可选）：`HAL_DAC_GetValue()`
+
+### DAC 输出三角波实验
+使用 `void dac_triangular_wave(uint16_t maxval, uint16_t dt, uint16_t samples, uint16_t n)` 函数。其中，maxval 为数字量（幅值），dt 为采样间隔，samples 为采样点个数，n 为波形个数。
+形参取值范围 $\frac{samples}{2}\le (maxval+1)$
+相邻采样点数字量之间的递增或递减幅值：$(maxval +1)/(samples/2)$
+
+### DAC 输出正弦波实验
+
+
+
+
+
+
+
+
+
 
