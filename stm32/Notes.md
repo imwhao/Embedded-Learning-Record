@@ -917,12 +917,81 @@ $$
 相邻采样点数字量之间的递增或递减幅值：$(maxval +1)/(samples/2)$
 
 ### DAC 输出正弦波实验
+1. 初始化 DMA：`HAL_DMA_Init()`
+2. 将 DMA 和 DAC 句柄联系起来：`__HAL_LINKDMA()`
+3. 初始化 DAC：`HAL_DAC_Init()`
+4. DAC MSP 初始化：`HAL_DAC_MspInit()` 配置 NVIC、CLOCK、GPIO 等
+5. 配置 DAC 相应通道相关参数：`HAL_DAC_ConfigChannel()`
+6. 启动 DMA 传输：`HAL_DMA_Start()`
+7. 配置定时器溢出频率并启动：`HAL_TIM_Base_Init()`、`HAL_TIM_Base_Start()`
+8. 配置定时器触发 DAC 转换：`HAL_TIMEx_MasterConfigSynchronization()`
+9. 停止/启动 DAC 转换、DMA 传输：`HAL_DAC_Stop_DMA()`、`HAL_DAC_Start_DMA()`
 
+产生正弦波函数：
+`void dac_creat_sin_buf(uint16_t maxval, uint16_t samples)`
+其中，maxval 为数字量，samples 为每个周期采样点个数。
+正弦波函数解析式：$y=Asin(wx+\phi)+b$，正弦波周期：$T=2\pi/w$，对应 $y=maxval*sin((2\pi/samples)*x)+maxval$
+形参取值范围：$(samples/2)<maxval$
+相邻采样点的 x 轴间隔：$2\pi / samples$
 
+### PWM DAC 实验
+在精度要求不高的场合，可以使用一种廉价的解决方案实现 DAC 输出：**PWM + RC 滤波器**
 
+根据傅里叶理论，任意周期波形都可以分解为无限个频率为其整数倍的谐波之和，将 PWM 波分段函数展开成傅里叶级数可以得到 `直流分量+1次谐波分量（基波分量）+大于一次谐波分量之和` 的形式，通过低通滤波器过滤掉谐波分量，就可以只保留直流分量，得到 PWM DAC 输出。展开式可以简化为：$f(t)=\frac{n}{N}V_H$ （直流分量从 0 到 $V_H$ 之间随 n 线性变化，DAC 分辨率= $log_{2}n$）
 
+8 位分辨率下对 RC 滤波器的设计要求：
+1. 精度要求：一般要求 1 次滤波对输出电压的影响不要超过 1 个位的精度，也就是 3.3/256=0.01289V
+2. 1 次谐波最大值：假设 VH 为 3.3V，VL 为 0V，那么一次谐波的最大值是 $2*3.3/\pi=2.1V$
+3. RC 滤波电路提供至少-20lg (2.1/0.01289)=-44dB 的衰减
+4. 截止频率要求：当定时器的计数频率为 72Mhz，PWM DAC 分辨率为 8 位时，PWM 频率为 72M/256=281.25KHz，若是 1 阶 RC 滤波，则要求截止频率为 1.77KHz，若是 2 阶 RC 滤波，则要求截止频率为 22.43KHz。
 
+## IR-Remote
+红外编码常用协议：
+1. NEC Protocol 的 PWM（脉冲宽度调制）：以红外载波的占空比表示 0 和 1（如 NEC 协议）
+	1. 发射红外载波的时间固定，通过改变不发射载波的时间来改变占空比
+2. Philips RC-5 Protocol 的 PPM（脉冲位置调制）：以发射载波的位置表示 0 和 1
+	1. 从发射载波到不发射载波为 0，从不发射载波到发射载波为 1
+	2. 发射载波和不发射载波的时间相同，都是 0.68ms，每位的时间都是固定的
 
+NEC 码位定义：
+1. 红外发射器
+	1. 发送协议数据 0 = 发射载波信号 560us + 不发射载波 560us 
+	2. 发送协议数据 1 = 发射载波信号 560us + 不发射载波 1680us
+2. 红外接收器：OUT 引脚电平输出情况（接收到红外载波时，OUT 输出低电平，否则输出高电平）
+	1. 接收到协议数据 0 = 560us 低电平 + 560us 高电平
+	2. 接收到协议数据 1 = 560us 低电平 + 1680us 高电平
+
+NEC 遥控器指令格式：
+1. 同步码（引导码）：低电平 9ms + 高电平 4.5ms（对于接收端）
+2. 地址码
+3. 地址反码
+4. 控制码
+5. 控制反码
+注意：
+1. 地址码、地址反码、控制码、控制反码均是 8 位数据格式
+2. 按照低位在前，高位在后的顺序发送（LSB）
+3. 采用反码是为了增加传输的可靠性（可用于校验）
+
+红外遥控驱动步骤
+1. 初始化 TIM4
+	1. 设置 ARR 和 PSC 等参数
+	2. `HAL_TIM_IC_Init` 初始化定时器
+2. 使能 TIM4 和输入通道 GPIO 时钟
+	1. GPIO 配置为复用功能
+	2. `HAL_GPIO_Init` / `HAL_TIM_IC_MspInit`
+3. 设置输入捕获模式 / 开启输入捕获
+	1. `HAL_TIM_IC_ConfigChannel`
+	2. 映射关系，输入滤波和输入分频
+4. 使能定时器相关中断
+	1. `__HAL_TIM_ENABLE_IT` 使能更新中断
+	2. `HAL_TIM_IC_Start_IT` 使能捕获中断，使能定时器
+	3. `HAL_NVIC_EnableIRQ` 使能定时器中断
+	4. `HAL_NVIC_SetPriority` 设置中断优先级
+5. 编写中断服务函数
+	1. `TIM4_IRQHandler` 定时器 4 中断服务函数
+	2. `HAL_TIM_IRQHandler` 定时器中断通用处理函数
+	3. `HAL_TIM_PeriodElapsedCallback` 更新中断回调
+	4. `HAL_TIM_IC_CaptureCallback` 捕获中断回调
 
 
 
