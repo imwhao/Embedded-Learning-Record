@@ -10,3 +10,4 @@
 | week3 | 学习 stm32 GPIO、中断、串口、IWDG，对 stm32 项目初步构思   |
 | week4 | 学习 stm32 WWDG、定时器知识，红外通信项目资料收集          |
 | week5 | OLED，LCD，USMART，RTC，RNG，LOW POWER，DMA学习            |
+| week6 | ADC，DAC，红外模块，Wifi 模块使用，红外通信项目程序构思                                                           |
