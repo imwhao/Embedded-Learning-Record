@@ -49,10 +49,44 @@ FreeRTOS 中任务共存在 4 种状态：
 4. 修改中断相关文件：修改 Systick 中断、SVC 中断、PendSV 中断
 5. 添加应用程序：验证移植是否成功
 
+系统配置文件：
+- 『INCLUDE』：配置 FreeRTOS 中可选的 API 函数
+- 『config』：完成 FreeRTOS 的功能配置和裁剪
+- 其他配置项：PendSV 宏定义、SVC 宏定义
+
+# 任务创建和删除
+## 任务创建和删除的 API 函数
+任务创建和删除的本质就是调用 FreeRTOS 的 API 函数
+
+| API 函数              | 描述             |
+| --------------------- | ---------------- |
+| `xTaskCreate()`       | 动态方式创建任务 |
+| `xTaskCreateStatic()` | 静态方式创建任务 |
+| `vTaskDelete()`       | 删除任务         |
+
+- 动态创建任务：任务的任务控制块以及任务的栈空间所需的内存，均由 FreeRTOS 从 FreeRTOS 管理的堆中分配
+- 静态创建任务：任务的任务控制块以及任务的栈空间所需的内存，需用户分配提供
 
 
+## 任务创建和删除
+实现动态创建任务流程：
+1. 将宏 `configSUPPORT_DYNAMIC_ALLOCATION` 配置为 1
+2. 定义函数入口参数
+3. 编写任务函数
+用起来只需要以上三步。此函数创建的任务会立刻进入就绪态，由任务调度器调度运行
 
+静态创建任务使用流程：
+1. 需将宏 `configSUPPORT_STATIC_ALLOCATION` 配置为 1
+2. 定义空闲任务 & 定时器任务的任务堆栈及 TCB
+3. 实现两个接口函数
+	1. `vApplicationGetIdleTaskMemory()`
+	2. `vApplicationGetTimerTaskMemory()`
+4. 定义函数入口参数
+5. 编写任务函数
 
+删除任务流程：
+1. 使用删除任务函数，需将宏 `INCLUDE_vTaskDelete` 配置为 1
+2. 入口参数输入需要删除的任务句柄 **（NULL 代表删除本身）**
 
 
 
