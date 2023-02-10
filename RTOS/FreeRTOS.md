@@ -153,4 +153,64 @@ FreeRTOS 所使用的中断管理利用的是 `BASEPRI` 寄存器，屏蔽优先
 2. 它仅仅是防止了任务之间的资源争夺，中断照样可以直接响应
 3. 挂起调度器的方式，适用于临界区位于任务与任务之间，既不用去延时中断，又可以做到临界区的安全
 
+# 列表和列表项
+## 介绍
+列表是 FreeRTOS 中的一个数据结构，概念上和链表有点类似，列表被用来跟踪 FreeRTOS 中的任务。列表项就是存放在列表中的项目。
+
+列表相当于链表，列表项相当于节点，FreeRTOS 中的列表是一个**双向环形链表**。
+
+列表结构体：
+```c
+typedef struct xLIST
+{
+
+      listFIRST_LIST_INTEGRITY_CHECK_VALUE  /* 校验值 */
+      volatile UBaseType_t uxNumberOfItems;  /* 列表中的列表项数量（不包括末尾列表项） */
+      ListItem_t * configLIST_VOLATILE pxIndex  /* 用于遍历列表项的指针 */
+      MiniListItem_t xListEnd  /* 末尾列表项 */
+      listSECOND_LIST_INTEGRITY_CHECK_VALUE  /* 校验值 */
+
+} List_t;
+```
+
+列表项结构体：
+```c
+struct xLIST_ITEM
+{
+	listFIRST_LIST_ITEM_INTEGRITY_CHECK_VALUE  /* 用于检测列表项的数据完整性 */
+	configLIST_VOLATILE TickType_t xItemValue  /* 列表项的值 */
+	struct xLIST_ITEM * configLIST_VOLATILE pxNext  /* 下一个列表项 */
+	struct xLIST_ITEM * configLIST_VOLATILE pxPrevious  /* 上一个列表项 */
+	void * pvOwner  /* 列表项的拥有者（通常是任务控制块） */
+	struct xLIST * configLIST_VOLATILE pxContainer;   /* 列表项所在列表 */
+	listSECOND_LIST_ITEM_INTEGRITY_CHECK_VALUE  /* 用于检测列表项的数据完整性 */
+};
+typedef struct xLIST_ITEM ListItem_t;
+```
+
+迷你列表项（仅用于标记列表的末尾和挂载其他插入列表中的列表项）：
+```c
+struct xMINI_LIST_ITEM
+{
+	listFIRST_LIST_ITEM_INTEGRITY_CHECK_VALUE   /* 用于检测数据完整性 */
+	configLIST_VOLATILE TickType_t xItemValue;  /* 列表项的值 */
+	struct xLIST_ITEM * configLIST_VOLATILE pxNext;  /* 上一个列表项 */
+	struct xLIST_ITEM * configLIST_VOLATILE pxPrevious; /* 下一个列表项 */
+};
+typedef struct xMINI_LIST_ITEM MiniListItem_t;
+```
+
+## 列表相关 API 函数
+| 函数                    | 描述               |
+| ----------------------- | ------------------ |
+| `vListInitialise()`     | 初始化列表         |
+| `vListInitialiseItem()` | 初始化列表项       |
+| `vListInsertEnd()`      | 列表插入列表项（插入到列表 `pxIndex` 指针指向的列表项前面，一种无序的插入方法） |
+| `vListInsert()`         | 列表插入列表项（列表项值升序插入）    |
+| `uxListRemove()`        | 列表移除列表项                   |
+
+
+
+
+
 
