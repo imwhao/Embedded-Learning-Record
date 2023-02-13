@@ -21,7 +21,8 @@ git commit --amend  -m "content"  ->上一次修改有错误或忘记提交部�
 
 # Git学习资源
 
-[git闯关网站](https://learngitbranching.js.org/?locale=zh_CN&NODEMO=)：使用命令模拟结合动画的方式学习git，使用后发现很适合对git的理念了解但不熟悉命令细节的用户。如果不知道什么是版本控制直接使用该网站可能一头雾水。
+- [git闯关网站](https://learngitbranching.js.org/?locale=zh_CN&NODEMO=)：使用命令模拟结合动画的方式学习 git，使用后发现很适合对 git 的理念了解但不熟悉命令细节的用户。如果不知道什么是版本控制直接使用该网站可能一头雾水。
+- [手撕Git，告别盲目记忆](https://zhuanlan.zhihu.com/p/98679880)
 
 # Git实用工具
 
