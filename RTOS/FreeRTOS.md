@@ -547,6 +547,13 @@ Tickless 模式相关配置项：
 | `heap_4` | 相邻空闲内存可合并，减少内存碎片的产生         | 时间不定                                       |
 | `heap_5` | 能够管理多个非连续内存区域的 `heap_4`          | 时间不定                                       |
 
+FreeRTOS 内存管理相关 API 函数介绍：
+
+| 函数                                     | 描述                   |
+| ---------------------------------------- | ---------------------- |
+| `void *pvPortMalloc(size_t xWantedSize)` | 申请内存               |
+| `void vPortFree(void *pv`                | 释放内存               |
+| `size_t xPortGetFreeHeapSize(void)`      | 获取当前空闲内存的大小 |
 
 
 
